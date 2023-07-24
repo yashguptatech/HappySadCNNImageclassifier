@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Pre Process Data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Image_Classification_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Image_Classification_files/libs/quarto-html/quarto.js"></script>
+<script src="Image_Classification_files/libs/quarto-html/popper.min.js"></script>
+<script src="Image_Classification_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Image_Classification_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Image_Classification_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Image_Classification_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Image_Classification_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Image_Classification_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Image_Classification_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Pre Process Data</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>pip install tensorflow opencv<span class="op">-</span>python matplotlib </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Requirement already satisfied: tensorflow in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (2.13.0)
+Requirement already satisfied: opencv-python in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (4.8.0.74)
+Requirement already satisfied: matplotlib in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (3.7.0)
+Requirement already satisfied: tensorflow-macos==2.13.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow) (2.13.0)
+Requirement already satisfied: numpy&lt;=1.24.3,&gt;=1.22 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (1.23.5)
+Requirement already satisfied: six&gt;=1.12.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (1.16.0)
+Requirement already satisfied: termcolor&gt;=1.1.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (2.3.0)
+Requirement already satisfied: gast&lt;=0.4.0,&gt;=0.2.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (0.4.0)
+Requirement already satisfied: wrapt&gt;=1.11.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (1.14.1)
+Requirement already satisfied: opt-einsum&gt;=2.3.2 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (3.3.0)
+Requirement already satisfied: packaging in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (22.0)
+Requirement already satisfied: libclang&gt;=13.0.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (16.0.6)
+Requirement already satisfied: tensorflow-estimator&lt;2.14,&gt;=2.13.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (2.13.0)
+Requirement already satisfied: keras&lt;2.14,&gt;=2.13.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (2.13.1)
+Requirement already satisfied: google-pasta&gt;=0.1.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (0.2.0)
+Requirement already satisfied: absl-py&gt;=1.0.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (1.4.0)
+Requirement already satisfied: protobuf!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,&lt;5.0.0dev,&gt;=3.20.3 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (3.20.3)
+Requirement already satisfied: grpcio&lt;2.0,&gt;=1.24.3 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (1.56.0)
+Requirement already satisfied: h5py&gt;=2.9.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (3.7.0)
+Requirement already satisfied: tensorboard&lt;2.14,&gt;=2.13 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (2.13.0)
+Requirement already satisfied: astunparse&gt;=1.6.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (1.6.3)
+Requirement already satisfied: typing-extensions&lt;4.6.0,&gt;=3.6.6 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (4.4.0)
+Requirement already satisfied: setuptools in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (65.6.3)
+Requirement already satisfied: flatbuffers&gt;=23.1.21 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorflow-macos==2.13.0-&gt;tensorflow) (23.5.26)
+Requirement already satisfied: cycler&gt;=0.10 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from matplotlib) (0.11.0)
+Requirement already satisfied: pillow&gt;=6.2.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from matplotlib) (9.4.0)
+Requirement already satisfied: python-dateutil&gt;=2.7 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from matplotlib) (2.8.2)
+Requirement already satisfied: pyparsing&gt;=2.3.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from matplotlib) (3.0.9)
+Requirement already satisfied: fonttools&gt;=4.22.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from matplotlib) (4.25.0)
+Requirement already satisfied: kiwisolver&gt;=1.0.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from matplotlib) (1.4.4)
+Requirement already satisfied: contourpy&gt;=1.0.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from matplotlib) (1.0.5)
+Requirement already satisfied: wheel&lt;1.0,&gt;=0.23.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from astunparse&gt;=1.6.0-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (0.38.4)
+Requirement already satisfied: google-auth-oauthlib&lt;1.1,&gt;=0.5 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (1.0.0)
+Requirement already satisfied: requests&lt;3,&gt;=2.21.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (2.31.0)
+Requirement already satisfied: google-auth&lt;3,&gt;=1.6.3 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (2.20.0)
+Requirement already satisfied: markdown&gt;=2.6.8 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (3.3.7)
+Requirement already satisfied: tensorboard-data-server&lt;0.8.0,&gt;=0.7.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (0.7.1)
+Requirement already satisfied: werkzeug&gt;=1.0.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (2.2.2)
+Requirement already satisfied: urllib3&lt;2.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (1.26.14)
+Requirement already satisfied: cachetools&lt;6.0,&gt;=2.0.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (5.3.1)
+Requirement already satisfied: pyasn1-modules&gt;=0.2.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (0.2.8)
+Requirement already satisfied: rsa&lt;5,&gt;=3.1.4 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (4.9)
+Requirement already satisfied: requests-oauthlib&gt;=0.7.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from google-auth-oauthlib&lt;1.1,&gt;=0.5-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (1.3.1)
+Requirement already satisfied: charset-normalizer&lt;4,&gt;=2 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from requests&lt;3,&gt;=2.21.0-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (3.1.0)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from requests&lt;3,&gt;=2.21.0-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (2023.5.7)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from requests&lt;3,&gt;=2.21.0-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (3.4)
+Requirement already satisfied: MarkupSafe&gt;=2.1.1 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from werkzeug&gt;=1.0.1-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (2.1.1)
+Requirement already satisfied: pyasn1&lt;0.5.0,&gt;=0.4.6 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from pyasn1-modules&gt;=0.2.1-&gt;google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (0.4.8)
+Requirement already satisfied: oauthlib&gt;=3.0.0 in /Users/yashgupta/anaconda3/lib/python3.10/site-packages (from requests-oauthlib&gt;=0.7.0-&gt;google-auth-oauthlib&lt;1.1,&gt;=0.5-&gt;tensorboard&lt;2.14,&gt;=2.13-&gt;tensorflow-macos==2.13.0-&gt;tensorflow) (3.2.2)
+Note: you may need to restart the kernel to use updated packages.</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>os.path.join(<span class="st">"data"</span>,<span class="st">"happy"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>'data/happy'</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gpus <span class="op">=</span> tf.config.experimental.list_physical_devices(<span class="st">'GPU'</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(gpus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="31">
+<pre><code>1</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avoid OOM Errors By Setting GPU Memory Consumption Growth</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>gpus <span class="op">=</span> tf.config.experimental.list_physical_devices(<span class="st">'GPU'</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> gpu <span class="kw">in</span> gpus:</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    tf.config.experimental.set_memory_growth(gpu, <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Remove dodgy images</p>
+<div class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cv2</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> imghdr</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>data_dir <span class="op">=</span> <span class="st">"data"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>os.listdir(os.path.join(data_dir,<span class="st">"happy"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="34">
+<pre><code>['images26.jpg',
+ 'images241.jpg',
+ 'images32.jpg',
+ '89ca5d41335b4f9207b9cf03538a7dbd63497e474912837562cb9f58809ac32f._RI_TTW_.png',
+ '05-12-21-happy-people.jpg',
+ '110754-utyeqqosky-1547658396.jpeg',
+ 'image22.jpeg',
+ 'Happy.jpg',
+ 'images137.jpg',
+ 'Overtly-Cheerful-Primer-Editorials-min.png',
+ 'how-happy-are-healthy-people.jpg',
+ '170404-happy-workers-feature.jpg',
+ 'images27.jpg',
+ 'friends-happy-190821.jpg',
+ 'images242.jpg',
+ 'goup-happy-people-group-jumping-isolated-white-background-35582232.jpg',
+ 'images134.jpg',
+ 'images120.jpg',
+ 'GettyImages-454356720.jpg',
+ 'WorldHappinessReport_620.jpg',
+ '_86a43964-aa8e-11e8-82d1-388e3d6e11aa.jpg',
+ 'images243.jpg',
+ 'images30.jpg',
+ 'png-transparent-graphy-happy-people-love-child-photography-thumbnail.png',
+ 'young-and-happy-people-vector-15114154.jpg',
+ 'images247.jpg',
+ 'file-20230208-27-3jttof.jpg',
+ 'images125.jpg',
+ 'friends_190412.jpg',
+ 'images21.jpg',
+ 'images246.jpg',
+ 'happy-people-jump-with-raised-arms-characters-win_107791-14884.jpg',
+ 'images250.jpg',
+ 'images23.jpg',
+ 'happy-peaceful.jpg',
+ 'images132.jpg',
+ 'MV5BMTM3ODM0NTQ1MF5BMl5BanBnXkFtZTcwMzAxMTM5OA._V1_FMjpg_UX1000_.jpg',
+ 'gdfVVm_MyCRtqpvdkt8vtSB1n_oz_CpwCq6vNMpj0S8.jpg',
+ 'images245.jpg',
+ 'images236.jpg',
+ 'images79.jpg',
+ 'images183.jpg',
+ 'images197.jpg',
+ 'happiness.jpg',
+ 'images6.jpg',
+ 'maxresdefault.jpg',
+ 'shiny-happy-people.jpg',
+ 'images7.jpg',
+ 'images196.jpg',
+ 'images182.jpg',
+ '20150413185238-secrets-happy-entrepreneurs-woman-gratitude-rainbow-.jpeg',
+ 'images78.jpg',
+ 'images50.jpg',
+ 'happy-person.jpeg',
+ 'images87.jpg',
+ 'images91.jpg',
+ 'images85.jpg',
+ 'images235.jpg',
+ 'image24.jpeg',
+ 'group-portrait-happy-people-disabilities-49330313.jpg',
+ 'images156.jpg',
+ 'GettyImages-871518740.jpg',
+ 'images195.jpg',
+ 'nm-how-happiness-affects-health-tnail.jpg',
+ 'images208.jpg',
+ 'images47.jpg',
+ 'images53.jpg',
+ 'images220.jpg',
+ 'images84.jpg',
+ 'group-young-happy-people-with-their-hands-up_369728-62.jpg',
+ 'images218.jpg',
+ 'images57.jpg',
+ 'images43.jpg',
+ '1HEoLBLidT2u4mhJ0oiDgig.png',
+ 'images191.jpg',
+ 'images146.jpg',
+ 'where-to-watch-shiny-happy-people.jpg',
+ 'happy-woman-in-nature-at-sunset.jpg',
+ 'image25.jpeg',
+ '9b65a25adca61c48bcb01370116723e3--happy-people-brings.jpg',
+ '_happy_jumping_on_beach-40815.jpg',
+ 'i00YzYyLTkxY2ItY2I3OWE3NDBmNDVmXkEyXkFqcGdeQXVyMjkwOTAyMDU._V1_FMjpg_UX1000_.jpg',
+ 'VJdvLa-download-happy-blackman-png.png',
+ 'Duggar-Family-Secrets-Are-Exposed-in-New-Docuseries-Featuring-Jill-and-Amy-featured.png',
+ '613k1XcpYCL.jpg',
+ 'images42.jpg',
+ 'images81.jpg',
+ 'images95.jpg',
+ '56f455011e0000b300705475.jpeg',
+ 'images83.jpg',
+ 'hand-drawn-happy-friends-jumping_23-2149095224.jpg',
+ 'images179.jpg',
+ 'images150.jpg',
+ 'A_Sep20_14_1189155141.jpg',
+ 'ipsos-global-advisor-happiness-2022-opti.jpg',
+ 'images193.jpg',
+ 'images55.jpg',
+ 'images232.jpg',
+ 'happy-indians_5f66fd46d9f5b.jpg',
+ 'images70.jpg',
+ 'Happy-people-800x533.jpg',
+ 'Screen-Shot-2012-10-23-at-12.57.22-PM.png',
+ 'images161.jpg',
+ 'images149.jpg',
+ 'images148.jpg',
+ 'images160.jpg',
+ 'Screaming-Happy-Woman-THe-Trent.jpg',
+ 'images71.jpg',
+ '343515-worldhappinessreport1440.jpg',
+ 'happiness_thumbnail.jpg',
+ 'images200.jpg',
+ 'images214.jpg',
+ 'images189.jpg',
+ 'images176.jpg',
+ 'happy-people.jpg',
+ 'image30.jpeg',
+ 'images66.jpg',
+ 'Successful-year.jpg',
+ 'images211.jpg',
+ '7VR73K6EP5ETVEOUFANWBUYJEQ.jpg',
+ 'physed-happiness-superJumbo.jpg',
+ 'images9.jpg',
+ '988689_Wallpaper2.jpg',
+ 'happy-people2.jpg',
+ '35438_hd.jpg',
+ 'images199.jpg',
+ 'Happy-People-PNG.png',
+ 'happy-people-vector-839522.jpg',
+ 'images63.jpg',
+ 'images210.jpg',
+ 'images77.jpg',
+ 'images204.jpg',
+ 'images238.jpg',
+ 'Dollarphotoclub_76084977-1.jpg',
+ 'images49.jpg',
+ 'images206.jpg',
+ 'jumping-and-dancing-happy-people-positive-emotions-set-illustration-free-vector.jpg',
+ 'habits-of-happy-people.jpg',
+ '1_617fd1e2590c2.jpg',
+ 'dv2051009.jpg',
+ 'happy-woman.jpg',
+ '377dac1b50ef865c920abb84d9d3857d173750b14306061e9aa5b4a1ec0dcdfa-rimg-w1196-h796-gmir.jpg',
+ 'smile.woman_.jpg',
+ 'images159.jpg',
+ 'images74.jpg',
+ 'images13.jpg',
+ 'Happy-Guy.jpg',
+ 'getty_152414899_97046097045006_68075.jpg',
+ 'images102.jpg',
+ 'images117.jpg',
+ '106827976-1611251261868-twenty20_33fd1f3f-9221-4c64-bcb1-bfeec3022d9b.jpg',
+ 'images249.jpg',
+ 'images12.jpg',
+ 'image16.jpeg',
+ 'images10.jpg',
+ 'what-makes-people-happy1.jpg',
+ 'getty_505175324_2000131020009280246_158016.jpg',
+ 'group-of-happy-people-2.jpg',
+ 'happy-people_1463241208.jpg',
+ 'images128.jpg',
+ 'images114.jpg',
+ 'getty_478389113_970647970450091_99776.jpg',
+ 'images11.jpg',
+ 'images29.jpg',
+ 'happy-people-in-the-poppy-field-1280x800-wide-wallpapers-net.jpg',
+ 'images15.jpg',
+ 'riskshappypeopletakeh_1384254283.jpg',
+ '835405.jpg',
+ 'images110.jpg',
+ 'hdptcar-fi-2.jpg',
+ 'images105.jpg',
+ 'images139.jpg',
+ 'happy-woman-headphones-pink-african-american-1296x728-header.jpg',
+ 'web3-happy-people-outside-smile-sun-nature-eduardo-dutra-620857-unsplash.jpg',
+ 'hand-drawn-happy-people-jumping_23-2149092878.jpg',
+ 'images14.jpg',
+ 'goup-happy-people-35582464.jpg',
+ 'compassion-900x387.jpg',
+ 'images107.jpg',
+ 'happypeople-1024x679.jpg',
+ 'images106.jpg',
+ 'images17.jpg',
+ 'png-clipart-happiness-graphy-smile-happy-people-love-photography.png']</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>image_exts <span class="op">=</span> [<span class="st">"jpg"</span>, <span class="st">"jpeg"</span>, <span class="st">"png"</span>, <span class="st">"bmp"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>image_exts[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="36">
+<pre><code>'jpg'</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> image_class <span class="kw">in</span> os.listdir(data_dir):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> image <span class="kw">in</span> os.listdir(os.path.join(data_dir, image_class)):</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(image)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>images26.jpg
+images241.jpg
+images32.jpg
+89ca5d41335b4f9207b9cf03538a7dbd63497e474912837562cb9f58809ac32f._RI_TTW_.png
+05-12-21-happy-people.jpg
+110754-utyeqqosky-1547658396.jpeg
+image22.jpeg
+Happy.jpg
+images137.jpg
+Overtly-Cheerful-Primer-Editorials-min.png
+how-happy-are-healthy-people.jpg
+170404-happy-workers-feature.jpg
+images27.jpg
+friends-happy-190821.jpg
+images242.jpg
+goup-happy-people-group-jumping-isolated-white-background-35582232.jpg
+images134.jpg
+images120.jpg
+GettyImages-454356720.jpg
+WorldHappinessReport_620.jpg
+_86a43964-aa8e-11e8-82d1-388e3d6e11aa.jpg
+images243.jpg
+images30.jpg
+png-transparent-graphy-happy-people-love-child-photography-thumbnail.png
+young-and-happy-people-vector-15114154.jpg
+images247.jpg
+file-20230208-27-3jttof.jpg
+images125.jpg
+friends_190412.jpg
+images21.jpg
+images246.jpg
+happy-people-jump-with-raised-arms-characters-win_107791-14884.jpg
+images250.jpg
+images23.jpg
+happy-peaceful.jpg
+images132.jpg
+MV5BMTM3ODM0NTQ1MF5BMl5BanBnXkFtZTcwMzAxMTM5OA._V1_FMjpg_UX1000_.jpg
+gdfVVm_MyCRtqpvdkt8vtSB1n_oz_CpwCq6vNMpj0S8.jpg
+images245.jpg
+images236.jpg
+images79.jpg
+images183.jpg
+images197.jpg
+happiness.jpg
+images6.jpg
+maxresdefault.jpg
+shiny-happy-people.jpg
+images7.jpg
+images196.jpg
+images182.jpg
+20150413185238-secrets-happy-entrepreneurs-woman-gratitude-rainbow-.jpeg
+images78.jpg
+images50.jpg
+happy-person.jpeg
+images87.jpg
+images91.jpg
+images85.jpg
+images235.jpg
+image24.jpeg
+group-portrait-happy-people-disabilities-49330313.jpg
+images156.jpg
+GettyImages-871518740.jpg
+images195.jpg
+nm-how-happiness-affects-health-tnail.jpg
+images208.jpg
+images47.jpg
+images53.jpg
+images220.jpg
+images84.jpg
+group-young-happy-people-with-their-hands-up_369728-62.jpg
+images218.jpg
+images57.jpg
+images43.jpg
+1HEoLBLidT2u4mhJ0oiDgig.png
+images191.jpg
+images146.jpg
+where-to-watch-shiny-happy-people.jpg
+happy-woman-in-nature-at-sunset.jpg
+image25.jpeg
+9b65a25adca61c48bcb01370116723e3--happy-people-brings.jpg
+_happy_jumping_on_beach-40815.jpg
+i00YzYyLTkxY2ItY2I3OWE3NDBmNDVmXkEyXkFqcGdeQXVyMjkwOTAyMDU._V1_FMjpg_UX1000_.jpg
+VJdvLa-download-happy-blackman-png.png
+Duggar-Family-Secrets-Are-Exposed-in-New-Docuseries-Featuring-Jill-and-Amy-featured.png
+613k1XcpYCL.jpg
+images42.jpg
+images81.jpg
+images95.jpg
+56f455011e0000b300705475.jpeg
+images83.jpg
+hand-drawn-happy-friends-jumping_23-2149095224.jpg
+images179.jpg
+images150.jpg
+A_Sep20_14_1189155141.jpg
+ipsos-global-advisor-happiness-2022-opti.jpg
+images193.jpg
+images55.jpg
+images232.jpg
+happy-indians_5f66fd46d9f5b.jpg
+images70.jpg
+Happy-people-800x533.jpg
+Screen-Shot-2012-10-23-at-12.57.22-PM.png
+images161.jpg
+images149.jpg
+images148.jpg
+images160.jpg
+Screaming-Happy-Woman-THe-Trent.jpg
+images71.jpg
+343515-worldhappinessreport1440.jpg
+happiness_thumbnail.jpg
+images200.jpg
+images214.jpg
+images189.jpg
+images176.jpg
+happy-people.jpg
+image30.jpeg
+images66.jpg
+Successful-year.jpg
+images211.jpg
+7VR73K6EP5ETVEOUFANWBUYJEQ.jpg
+physed-happiness-superJumbo.jpg
+images9.jpg
+988689_Wallpaper2.jpg
+happy-people2.jpg
+35438_hd.jpg
+images199.jpg
+Happy-People-PNG.png
+happy-people-vector-839522.jpg
+images63.jpg
+images210.jpg
+images77.jpg
+images204.jpg
+images238.jpg
+Dollarphotoclub_76084977-1.jpg
+images49.jpg
+images206.jpg
+jumping-and-dancing-happy-people-positive-emotions-set-illustration-free-vector.jpg
+habits-of-happy-people.jpg
+1_617fd1e2590c2.jpg
+dv2051009.jpg
+happy-woman.jpg
+377dac1b50ef865c920abb84d9d3857d173750b14306061e9aa5b4a1ec0dcdfa-rimg-w1196-h796-gmir.jpg
+smile.woman_.jpg
+images159.jpg
+images74.jpg
+images13.jpg
+Happy-Guy.jpg
+getty_152414899_97046097045006_68075.jpg
+images102.jpg
+images117.jpg
+106827976-1611251261868-twenty20_33fd1f3f-9221-4c64-bcb1-bfeec3022d9b.jpg
+images249.jpg
+images12.jpg
+image16.jpeg
+images10.jpg
+what-makes-people-happy1.jpg
+getty_505175324_2000131020009280246_158016.jpg
+group-of-happy-people-2.jpg
+happy-people_1463241208.jpg
+images128.jpg
+images114.jpg
+getty_478389113_970647970450091_99776.jpg
+images11.jpg
+images29.jpg
+happy-people-in-the-poppy-field-1280x800-wide-wallpapers-net.jpg
+images15.jpg
+riskshappypeopletakeh_1384254283.jpg
+835405.jpg
+images110.jpg
+hdptcar-fi-2.jpg
+images105.jpg
+images139.jpg
+happy-woman-headphones-pink-african-american-1296x728-header.jpg
+web3-happy-people-outside-smile-sun-nature-eduardo-dutra-620857-unsplash.jpg
+hand-drawn-happy-people-jumping_23-2149092878.jpg
+images14.jpg
+goup-happy-people-35582464.jpg
+compassion-900x387.jpg
+images107.jpg
+happypeople-1024x679.jpg
+images106.jpg
+images17.jpg
+png-clipart-happiness-graphy-smile-happy-people-love-photography.png
+42-15542443.jpg
+sad-person-concept-vector-26538685.jpg
+png-transparent-woman-sad-folklore-ghost-horror-spirit-vendetta-vengeance-girl-person-thumbnail.png
+sad-people-icon-2CCHXB2.jpg
+2652760.jpg
+dreamstime_s_101440985.jpg
+aid12707023-v4-1200px-Make-a-Sad-Person-Happy-Step-10.jpg
+man-portrait-contemplative-sad-looking-at-camera-732x549-thumbnail.jpg
+iStock_000001932580XSmall.jpg
+pexels-photo-4584665.jpeg
+n-rendering-frustrated-upset-man-sitting-white-people-man-character-53250684.jpg
+image-asset.jpeg
+sadness-person-depression-clip-art-bored-cliparts.jpg
+sad-eating_620x350_71525950886.jpg
+sadness-inside-out-today-main-tease-191018.jpg
+maxresdefault2.jpg
+images20.jpg
+sad-adult-man-checking-bad-news-smart-phone-side-view-portrait-park-161654848.jpg
+7RNXwSxCAKL8vGtXG2ZkyD-1200-80.jpg
+.DS_Store
+depositphotos_41329389-stock-photo-sad-girl-on-the-windowsill.jpg
+getty_91745128_333755.jpg
+sad-person-pictures-2bnso9uiwlhrikrx.jpg
+depressed-woman-sitting-chair-dark-room-home_53476-2193.jpg
+depositphotos_508407352-stock-photo-caucasian-male-sitting-floor-windows.jpg
+SAD.jpg
+person-super-depressed.jpg
+sad-serious-illness-womandepressed-emotion-260nw-1810793920.jpg
+sad-glance-mm-nisan-kandilcioglu.jpg
+73705bd7debb66c2afc780a22c223804.jpg
+Sad-man-being-consoled-by-friends-in-group-therapy.jpg
+214-2142366_transparent-depression-png-depressed-sad-person-png-png.png
+maxresdefault.jpg
+5acf9ed1146e711e008b46d7.jpg
+Science_robotgait_124649246.jpg
+Sadder-not-wiser_AdobeStock_219682170.jpg
+283-2838105_clipart-resting-man-sad-person-silhouette-png.png
+portrait-sad-man-260nw-126009806.jpg
+stock-photo-depressed-man-studio-shot-404652526.jpg
+39843138-sad-man.jpg
+Make-someone-sad-happy.jpg
+314071_2200-732x549.jpg
+dark-depression-mood-people-wallpaper-preview.jpg
+sad-person-pictures-1920-x-1270-5jatnx06kaizb3sc.jpg
+63218722.jpg
+Sad-People.jpg
+8iAb9k4aT.jpg
+280-2804580_sad-people-png-sad-person-png-transparent-png.png
+crying-at-work.jpg
+all-those-people-who-are-sad-17573-1.jpg
+anxious-man-indoors-front-view_23-2149729600.jpg
+lonely-depressed-person-sitting-near-brick-wall_181624-30778.jpg
+very-sad-man-sitting-alone-on-white-background-depressed-young-man-sitting-businessman-vector.jpg
+-unhappy-miss-good-chance-dressed-casually-isolated-yellow-wall_273609-37534.jpg
+107188144-1675355909384-gettyimages-1302154722-dsc_9175.jpeg
+sadness.jpg
+depression-1020x680.jpg
+crying-on-steps-e1505252236719-300x200.jpg
+sad-people-vector-26812552.jpg
+sad2.jpg
+Depression-Quotes-from-Books-1-1.jpg
+How-To-Make-Someone-Happy-When-Theyre-Sad.jpg
+sad-depressed-man-702x375.jpg
+sad-hero.jpg
+1694806.jpg
+sad-woman.jpg
+pngtree-portrait-of-sad-person-vector-picture-image_2293852.jpg
+405-4050267_sad-people-png-sad-person-transparent-background-png.png
+man-tears-tear-look.jpg
+Sad-man-sitting-in-bedroom-header.jpg
+man-with-head-down-300x300.jpg
+186918-afqmdoqiwx-1676522411.jpg
+strated-depressed-man-sitting-on-plastic-stool-3d-white-people-man-character.jpg
+sad-people-group-therapy-session_23-2148752071.jpg
+Depression-Vs-Sadness-Are-You-Just-Sad-Or-Depressed-2020-960x640.jpg
+image-20160914-4963-19knfh1.jpg
+sad-wise-woman-at-window.jpg
+screen-shot-2014-07-31-at-6-09-12-pm.png
+images14.jpg
+_2539df08-4f50-11e6-85e3-522dd231fa74.jpg
+boy-with-head-down.jpg
+Seasonal-affective-disorder.png
+b2ap3_large_happy-sad-unsplash-850x575.jpg</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(os.path.join(data_dir, <span class="st">"happy"</span>, <span class="st">"_86a43964-aa8e-11e8-82d1-388e3d6e11aa.jpg"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>img.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="40">
+<pre><code>(540, 960, 3)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="41">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Image_Classification_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> image_class <span class="kw">in</span> os.listdir(data_dir):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> image <span class="kw">in</span> os.listdir(os.path.join(data_dir, image_class)):</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        image_path <span class="op">=</span> os.path.join(data_dir, image_class, image)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>            img <span class="op">=</span> cv2.imread(image_path)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>            tip <span class="op">=</span> imghdr.what(image_path)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tip <span class="kw">not</span> <span class="kw">in</span> image_exts:</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="st">"Image not in ext list </span><span class="sc">{}</span><span class="st">"</span> .<span class="bu">format</span>(image_path))</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>                os.remove(image_path)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"Issue with image at </span><span class="sc">{}</span><span class="st">"</span> .<span class="bu">format</span>(image_path))</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>            <span class="co"># os.remove(image_path)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>libpng warning: iCCP: known incorrect sRGB profile</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Image not in ext list data/sad/.DS_Store
+Image not in ext list data/sad/depositphotos_41329389-stock-photo-sad-girl-on-the-windowsill.jpg
+Image not in ext list data/sad/sad-person-pictures-2bnso9uiwlhrikrx.jpg
+Image not in ext list data/sad/depositphotos_508407352-stock-photo-caucasian-male-sitting-floor-windows.jpg
+Image not in ext list data/sad/sad-serious-illness-womandepressed-emotion-260nw-1810793920.jpg
+Image not in ext list data/sad/portrait-sad-man-260nw-126009806.jpg
+Image not in ext list data/sad/39843138-sad-man.jpg
+Image not in ext list data/sad/sad-person-pictures-1920-x-1270-5jatnx06kaizb3sc.jpg
+Image not in ext list data/sad/very-sad-man-sitting-alone-on-white-background-depressed-young-man-sitting-businessman-vector.jpg
+Image not in ext list data/sad/strated-depressed-man-sitting-on-plastic-stool-3d-white-people-man-character.jpg</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>tf.data.Dataset.??</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="44">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="84">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> tf.keras.utils.image_dataset_from_directory(<span class="st">'data'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Found 256 files belonging to 2 classes.</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="61">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>data_iterators <span class="op">=</span> data.as_numpy_iterator()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="73">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get another batch from data_iterators</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>batch <span class="op">=</span> data_iterators.<span class="bu">next</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="63">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(batch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="63">
+<pre><code>2</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="64">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># images represent as numpy arrays</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>batch[<span class="dv">0</span>].shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="64">
+<pre><code>(32, 256, 256, 3)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="69">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># class 0 = happy</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># class 1 = sad</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>batch[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="69">
+<pre><code>array([1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,
+       1, 0, 1, 0, 1, 0, 0, 1, 0, 1], dtype=int32)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="66">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(ncols<span class="op">=</span><span class="dv">4</span>, figsize<span class="op">=</span>(<span class="dv">20</span>, <span class="dv">20</span>))</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, img <span class="kw">in</span> <span class="bu">enumerate</span>(batch[<span class="dv">0</span>][:<span class="dv">4</span>]):</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    ax[idx].imshow(img.astype(<span class="bu">int</span>))</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    ax[idx].title.set_text(batch[<span class="dv">1</span>][idx])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Image_Classification_files/figure-html/cell-25-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="74">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>scaled <span class="op">=</span> batch[<span class="dv">0</span>]<span class="op">/</span><span class="dv">255</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="75">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>scaled[<span class="dv">0</span>].<span class="bu">max</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="75">
+<pre><code>1.0</code></pre>
+</div>
+</div>
+<section id="scale-data" class="level2">
+<h2 class="anchored" data-anchor-id="scale-data">scale data</h2>
+<div class="cell" data-execution_count="85">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data.<span class="bu">map</span>(<span class="kw">lambda</span> x, y: (x<span class="op">/</span><span class="dv">255</span>, y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="87">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>scaled_iterator <span class="op">=</span> data.as_numpy_iterator()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="92">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>batch <span class="op">=</span> scaled_iterator.<span class="bu">next</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="93">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>batch[<span class="dv">0</span>].<span class="bu">max</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="93">
+<pre><code>1.0</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="94">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(ncols<span class="op">=</span><span class="dv">4</span>, figsize<span class="op">=</span>(<span class="dv">20</span>, <span class="dv">20</span>))</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, img <span class="kw">in</span> <span class="bu">enumerate</span>(batch[<span class="dv">0</span>][:<span class="dv">4</span>]):</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    ax[idx].imshow(img)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    ax[idx].title.set_text(batch[<span class="dv">1</span>][idx])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Image_Classification_files/figure-html/cell-32-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="95">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="95">
+<pre><code>8</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="105">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>train_size <span class="op">=</span> <span class="bu">int</span>(<span class="bu">len</span>(data)<span class="op">*</span><span class="fl">.7</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>val_size <span class="op">=</span> <span class="bu">int</span>(<span class="bu">len</span>(data)<span class="op">*</span><span class="fl">.2</span>)<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>test_size <span class="op">=</span> <span class="bu">int</span>(<span class="bu">len</span>(data)<span class="op">*</span><span class="fl">.1</span>)<span class="op">+</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="106">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> data.take(train_size)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>val <span class="op">=</span> data.skip(train_size).take(val_size)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> data.skip(train_size<span class="op">+</span>val_size).take(test_size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="110">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="110">
+<pre><code>1</code></pre>
+</div>
+</div>
+</section>
+<section id="deep-model" class="level1">
+<h1>DEEP MODEL</h1>
+<section id="good-stuff" class="level2">
+<h2 class="anchored" data-anchor-id="good-stuff">good stuff</h2>
+<div class="cell" data-execution_count="111">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.models <span class="im">import</span> Sequential</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> Dense, Conv2D, MaxPooling2D, Flatten</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="112">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Sequential()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="113">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>model.add(Conv2D(<span class="dv">16</span>, (<span class="dv">3</span>, <span class="dv">3</span>), activation<span class="op">=</span><span class="st">'relu'</span>, input_shape<span class="op">=</span>(<span class="dv">256</span>, <span class="dv">256</span>, <span class="dv">3</span>)))</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>model.add(MaxPooling2D())</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>model.add(Conv2D(<span class="dv">32</span>, (<span class="dv">3</span>, <span class="dv">3</span>), activation<span class="op">=</span><span class="st">'relu'</span>))</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>model.add(MaxPooling2D())</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>model.add(Conv2D(<span class="dv">64</span>, (<span class="dv">3</span>, <span class="dv">3</span>), activation<span class="op">=</span><span class="st">'relu'</span>))</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>model.add(MaxPooling2D())</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>model.add(Flatten())</span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>model.add(Dense(<span class="dv">256</span>, activation<span class="op">=</span><span class="st">'relu'</span>))</span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>model.add(Dense(<span class="dv">1</span>, activation<span class="op">=</span><span class="st">'sigmoid'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="114">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">compile</span>(optimizer<span class="op">=</span><span class="st">'adam'</span>, loss<span class="op">=</span><span class="st">'binary_crossentropy'</span>, metrics<span class="op">=</span>[<span class="st">'accuracy'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="115">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>model.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ conv2d (Conv2D)             (None, 254, 254, 16)      448       
+                                                                 
+ max_pooling2d (MaxPooling2  (None, 127, 127, 16)      0         
+ D)                                                              
+                                                                 
+ conv2d_1 (Conv2D)           (None, 125, 125, 32)      4640      
+                                                                 
+ max_pooling2d_1 (MaxPoolin  (None, 62, 62, 32)        0         
+ g2D)                                                            
+                                                                 
+ conv2d_2 (Conv2D)           (None, 60, 60, 64)        18496     
+                                                                 
+ max_pooling2d_2 (MaxPoolin  (None, 30, 30, 64)        0         
+ g2D)                                                            
+                                                                 
+ flatten (Flatten)           (None, 57600)             0         
+                                                                 
+ dense (Dense)               (None, 256)               14745856  
+                                                                 
+ dense_1 (Dense)             (None, 1)                 257       
+                                                                 
+=================================================================
+Total params: 14769697 (56.34 MB)
+Trainable params: 14769697 (56.34 MB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="116">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>log_dir <span class="op">=</span> <span class="st">"logs"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="117">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>tensorboard_callback <span class="op">=</span> tf.keras.callbacks.TensorBoard(log_dir<span class="op">=</span>log_dir)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="119">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>hist <span class="op">=</span> model.fit(train, epochs<span class="op">=</span><span class="dv">20</span>, validation_data<span class="op">=</span>val, callbacks<span class="op">=</span>[tensorboard_callback])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch 1/20
+5/5 [==============================] - ETA: 0s - loss: 0.4889 - accuracy: 0.77505/5 [==============================] - 5s 524ms/step - loss: 0.4889 - accuracy: 0.7750 - val_loss: 0.4424 - val_accuracy: 0.7969
+Epoch 2/20
+5/5 [==============================] - ETA: 0s - loss: 0.4262 - accuracy: 0.83135/5 [==============================] - 4s 505ms/step - loss: 0.4262 - accuracy: 0.8313 - val_loss: 0.3926 - val_accuracy: 0.8125
+Epoch 3/20
+5/5 [==============================] - ETA: 0s - loss: 0.3965 - accuracy: 0.81885/5 [==============================] - 3s 475ms/step - loss: 0.3965 - accuracy: 0.8188 - val_loss: 0.3264 - val_accuracy: 0.8438
+Epoch 4/20
+5/5 [==============================] - ETA: 0s - loss: 0.3529 - accuracy: 0.83755/5 [==============================] - 4s 511ms/step - loss: 0.3529 - accuracy: 0.8375 - val_loss: 0.3572 - val_accuracy: 0.8750
+Epoch 5/20
+5/5 [==============================] - ETA: 0s - loss: 0.3628 - accuracy: 0.81255/5 [==============================] - 4s 495ms/step - loss: 0.3628 - accuracy: 0.8125 - val_loss: 0.2598 - val_accuracy: 0.8438
+Epoch 6/20
+5/5 [==============================] - ETA: 0s - loss: 0.2974 - accuracy: 0.89385/5 [==============================] - 4s 491ms/step - loss: 0.2974 - accuracy: 0.8938 - val_loss: 0.2969 - val_accuracy: 0.9219
+Epoch 7/20
+5/5 [==============================] - ETA: 0s - loss: 0.2591 - accuracy: 0.87505/5 [==============================] - 4s 504ms/step - loss: 0.2591 - accuracy: 0.8750 - val_loss: 0.1370 - val_accuracy: 0.9844
+Epoch 8/20
+5/5 [==============================] - ETA: 0s - loss: 0.1948 - accuracy: 0.94385/5 [==============================] - 4s 510ms/step - loss: 0.1948 - accuracy: 0.9438 - val_loss: 0.4012 - val_accuracy: 0.8438
+Epoch 9/20
+5/5 [==============================] - ETA: 0s - loss: 0.3080 - accuracy: 0.86255/5 [==============================] - 4s 510ms/step - loss: 0.3080 - accuracy: 0.8625 - val_loss: 0.2178 - val_accuracy: 0.9531
+Epoch 10/20
+5/5 [==============================] - ETA: 0s - loss: 0.2300 - accuracy: 0.88135/5 [==============================] - 4s 524ms/step - loss: 0.2300 - accuracy: 0.8813 - val_loss: 0.3196 - val_accuracy: 0.7969
+Epoch 11/20
+5/5 [==============================] - ETA: 0s - loss: 0.1793 - accuracy: 0.93755/5 [==============================] - 4s 502ms/step - loss: 0.1793 - accuracy: 0.9375 - val_loss: 0.1753 - val_accuracy: 0.9688
+Epoch 12/20
+5/5 [==============================] - ETA: 0s - loss: 0.1576 - accuracy: 0.95005/5 [==============================] - 4s 507ms/step - loss: 0.1576 - accuracy: 0.9500 - val_loss: 0.2195 - val_accuracy: 0.8750
+Epoch 13/20
+5/5 [==============================] - ETA: 0s - loss: 0.1259 - accuracy: 0.96255/5 [==============================] - 4s 499ms/step - loss: 0.1259 - accuracy: 0.9625 - val_loss: 0.1329 - val_accuracy: 0.9531
+Epoch 14/20
+5/5 [==============================] - ETA: 0s - loss: 0.1181 - accuracy: 0.95635/5 [==============================] - 4s 497ms/step - loss: 0.1181 - accuracy: 0.9563 - val_loss: 0.1176 - val_accuracy: 0.9688
+Epoch 15/20
+5/5 [==============================] - ETA: 0s - loss: 0.0881 - accuracy: 0.96255/5 [==============================] - 4s 521ms/step - loss: 0.0881 - accuracy: 0.9625 - val_loss: 0.1008 - val_accuracy: 0.9531
+Epoch 16/20
+5/5 [==============================] - ETA: 0s - loss: 0.0751 - accuracy: 0.96885/5 [==============================] - 4s 517ms/step - loss: 0.0751 - accuracy: 0.9688 - val_loss: 0.0408 - val_accuracy: 1.0000
+Epoch 17/20
+5/5 [==============================] - ETA: 0s - loss: 0.0567 - accuracy: 0.97505/5 [==============================] - 4s 498ms/step - loss: 0.0567 - accuracy: 0.9750 - val_loss: 0.0553 - val_accuracy: 0.9688
+Epoch 18/20
+5/5 [==============================] - ETA: 0s - loss: 0.0565 - accuracy: 0.96885/5 [==============================] - 4s 528ms/step - loss: 0.0565 - accuracy: 0.9688 - val_loss: 0.0379 - val_accuracy: 0.9844
+Epoch 19/20
+5/5 [==============================] - ETA: 0s - loss: 0.0436 - accuracy: 0.98755/5 [==============================] - 4s 507ms/step - loss: 0.0436 - accuracy: 0.9875 - val_loss: 0.0233 - val_accuracy: 1.0000
+Epoch 20/20
+5/5 [==============================] - ETA: 0s - loss: 0.0194 - accuracy: 1.00005/5 [==============================] - 4s 514ms/step - loss: 0.0194 - accuracy: 1.0000 - val_loss: 0.0281 - val_accuracy: 1.0000</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-07-20 17:10:34.967074: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:38.117093: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:39.638033: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:41.727498: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:43.240873: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:45.158957: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:46.640364: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:48.636663: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:50.236272: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:52.398276: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:53.911006: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:56.011591: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:57.517580: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:10:59.564448: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:01.080869: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:03.225978: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:04.750473: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:06.768608: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:08.306437: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:10.395704: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:11.949082: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:13.980423: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:15.490867: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:17.504220: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:19.041726: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:21.174097: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:22.699740: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:24.722403: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:26.224474: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:28.325689: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:29.868982: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:32.035018: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:33.569637: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:35.554743: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:37.142310: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:39.272682: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:40.818839: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:42.927776: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:44.460564: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:11:46.506870: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="121">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>hist.history</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="121">
+<pre><code>{'loss': [0.48891955614089966,
+  0.42618221044540405,
+  0.39646250009536743,
+  0.35291406512260437,
+  0.3627679944038391,
+  0.2973537743091583,
+  0.25914955139160156,
+  0.19477717578411102,
+  0.3079727292060852,
+  0.2299739122390747,
+  0.17928972840309143,
+  0.15764157474040985,
+  0.12594133615493774,
+  0.11812986433506012,
+  0.08810918033123016,
+  0.07507552206516266,
+  0.05671491473913193,
+  0.05652432516217232,
+  0.043638717383146286,
+  0.019375137984752655],
+ 'accuracy': [0.7749999761581421,
+  0.831250011920929,
+  0.8187500238418579,
+  0.8374999761581421,
+  0.8125,
+  0.893750011920929,
+  0.875,
+  0.9437500238418579,
+  0.862500011920929,
+  0.8812500238418579,
+  0.9375,
+  0.949999988079071,
+  0.9624999761581421,
+  0.956250011920929,
+  0.9624999761581421,
+  0.96875,
+  0.9750000238418579,
+  0.96875,
+  0.987500011920929,
+  1.0],
+ 'val_loss': [0.4423597455024719,
+  0.3925760090351105,
+  0.32641565799713135,
+  0.35717278718948364,
+  0.2597724497318268,
+  0.29693150520324707,
+  0.13703389465808868,
+  0.4012300968170166,
+  0.2178315967321396,
+  0.3195665776729584,
+  0.17528003454208374,
+  0.21950949728488922,
+  0.13289746642112732,
+  0.11763730645179749,
+  0.10083732008934021,
+  0.040824517607688904,
+  0.05528122931718826,
+  0.03785565122961998,
+  0.02329118922352791,
+  0.028085507452487946],
+ 'val_accuracy': [0.796875,
+  0.8125,
+  0.84375,
+  0.875,
+  0.84375,
+  0.921875,
+  0.984375,
+  0.84375,
+  0.953125,
+  0.796875,
+  0.96875,
+  0.875,
+  0.953125,
+  0.96875,
+  0.953125,
+  1.0,
+  0.96875,
+  0.984375,
+  1.0,
+  1.0]}</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="124">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>plt.plot(hist.history[<span class="st">"loss"</span>], color<span class="op">=</span><span class="st">"teal"</span>, label<span class="op">=</span><span class="st">"loss"</span>)</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>plt.plot(hist.history[<span class="st">"val_loss"</span>], color<span class="op">=</span><span class="st">"orange"</span>, label<span class="op">=</span><span class="st">"val_loss"</span>)</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Loss"</span>, fontsize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Image_Classification_files/figure-html/cell-46-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="125">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>plt.plot(hist.history[<span class="st">"accuracy"</span>], color<span class="op">=</span><span class="st">"teal"</span>, label<span class="op">=</span><span class="st">"accuracy"</span>)</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>plt.plot(hist.history[<span class="st">"val_accuracy"</span>], color<span class="op">=</span><span class="st">"orange"</span>, label<span class="op">=</span><span class="st">"val_accuracy"</span>)</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Accuracy"</span>, fontsize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Image_Classification_files/figure-html/cell-47-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="126">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.metrics <span class="im">import</span> Precision, Recall, BinaryAccuracy</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="127">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>pre <span class="op">=</span> Precision()</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>re <span class="op">=</span> Recall()</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>acc <span class="op">=</span> BinaryAccuracy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="128">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> test.as_numpy_iterator():</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>    X, y <span class="op">=</span> batch</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>    yhat <span class="op">=</span> model.predict(X)</span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>    pre.update_state(y, yhat)</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>    re.update_state(y, yhat)</span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>    acc.update_state(y, yhat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-07-20 17:24:53.826827: W tensorflow/core/lib/png/png_io.cc:88] PNG warning: iCCP: known incorrect sRGB profile
+2023-07-20 17:24:54.736756: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1/1 [==============================] - 0s 305ms/step</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="129">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Precision: </span><span class="sc">{}</span><span class="st">"</span> .<span class="bu">format</span>(pre.result().numpy()))</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Recall: </span><span class="sc">{}</span><span class="st">"</span> .<span class="bu">format</span>(re.result().numpy()))</span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Accuracy: </span><span class="sc">{}</span><span class="st">"</span> .<span class="bu">format</span>(acc.result().numpy()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Precision: 1.0
+Recall: 1.0
+Accuracy: 1.0</code></pre>
+</div>
+</div>
+</section>
+<section id="test" class="level2">
+<h2 class="anchored" data-anchor-id="test">Test</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cv2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="175">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(<span class="st">"sad_test.jpeg"</span>)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Image_Classification_files/figure-html/cell-53-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="176">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>resize <span class="op">=</span> tf.image.resize(img, (<span class="dv">256</span>, <span class="dv">256</span>))</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>plt.imshow(resize.numpy().astype(<span class="bu">int</span>))</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Image_Classification_files/figure-html/cell-54-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="177">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>np.expand_dims(resize, <span class="dv">0</span>).shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="177">
+<pre><code>(1, 256, 256, 3)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="178">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>yhat <span class="op">=</span> model.predict(np.expand_dims(resize<span class="op">/</span><span class="dv">255</span>, <span class="dv">0</span>))</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>yhat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1/1 [==============================] - 0s 16ms/step</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="178">
+<pre><code>array([[0.93335557]], dtype=float32)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="179">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> yhat <span class="op">&lt;</span> <span class="fl">.5</span>:</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Happy"</span>)</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Sad"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Sad</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="182">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.models <span class="im">import</span> load_model</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>model.save(os.path.join(<span class="st">"models"</span>,<span class="st">"happysadmodel.h5"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Users/yashgupta/anaconda3/lib/python3.10/site-packages/keras/src/engine/training.py:3000: UserWarning: You are saving your model as an HDF5 file via `model.save()`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')`.
+  saving_api.save_model(</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="183">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>new_model <span class="op">=</span> load_model(os.path.join(<span class="st">"models"</span>,<span class="st">"happysadmodel.h5"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="186">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>yhat_new <span class="op">=</span> new_model.predict(np.expand_dims(resize<span class="op">/</span><span class="dv">255</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1/1 [==============================] - 0s 199ms/step</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-07-20 17:54:43.904959: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:114] Plugin optimizer for device_type GPU is enabled.</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="187">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> yhat_new <span class="op">&lt;</span> <span class="fl">.5</span>:</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Happy"</span>)</span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Sad"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Sad</code></pre>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
